@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+import os
+import re
+import importlib
+
 """
 AzuraBot's most important file.
 """
@@ -11,10 +15,19 @@ class Bot:
         self._main_loop()
 
     def _load_all_plugins(self):
-        pass
+        reg = re.compile("f.*\.py$", re.IGNORECASE)
+        file_names = filter(reg.search,
+                            os.listdir(os.path.join(os.path.dirname(__file__),
+                                                    "plugins")))
+        for file_name in file_names:
+            self._load_plugin(file_name[:-3])
 
     def _load_plugin(self, file_name):
-        pass
+        print("Loading plugin", file_name)
+
+        file = importlib.import_module("plugins." + file_name)
+        plugin = file.Plugin()
+        plugin.start()
 
     def _main_loop(self):
         pass
