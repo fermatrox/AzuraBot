@@ -15,7 +15,7 @@ class Bot:
         self._main_loop()
 
     def _load_all_plugins(self):
-        reg = re.compile("f.*\.py$", re.IGNORECASE)
+        reg = re.compile(".+_pi\.py$", re.IGNORECASE)
         file_names = filter(reg.search,
                             os.listdir(os.path.join(os.path.dirname(__file__),
                                                     "plugins")))
