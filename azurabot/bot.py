@@ -4,12 +4,21 @@ import os
 import re
 import importlib
 
+import azurabot.plugin_list
+
 """
 AzuraBot's most important file.
 """
 
 
 class Bot:
+    """
+    The bot itself. When you make a bot, it should inherit this class.
+    """
+
+    def __init__(self):
+        self.plugin_list = azurabot.plugin_list.PluginList()
+
     def run(self):
         self._load_all_plugins()
         self._main_loop()
@@ -17,7 +26,7 @@ class Bot:
     def _load_all_plugins(self):
         reg = re.compile(".+_pi\.py$", re.IGNORECASE)
         file_names = filter(reg.search,
-                            os.listdir(os.path.join(os.path.dirname(__file__),
+                            os.listdir(os.path.join("azurabot",
                                                     "plugins")))
         for file_name in file_names:
             self._load_plugin(file_name[:-3])
@@ -25,7 +34,7 @@ class Bot:
     def _load_plugin(self, file_name):
         print("Loading plugin", file_name)
 
-        file = importlib.import_module("plugins." + file_name)
+        file = importlib.import_module("azurabot.plugins." + file_name)
         plugin = file.Plugin()
         plugin.start()
 
