@@ -4,8 +4,6 @@ import os
 import re
 import importlib
 
-import azurabot.plugin_list
-
 """
 AzuraBot's most important file.
 """
@@ -17,7 +15,7 @@ class Bot:
     """
 
     def __init__(self):
-        self.plugin_list = azurabot.plugin_list.PluginList()
+        pass
 
     def run(self):
         self._load_all_plugins()
