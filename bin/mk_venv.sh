@@ -8,7 +8,7 @@ fi
 
 cd $virtual_envs_path
 
-virtualenv -p /usr/bin/python3.6 AzuraBot
+virtualenv -p /usr/bin/python3.7 AzuraBot
 
 source AzuraBot/bin/activate
 pip install --upgrade pip
