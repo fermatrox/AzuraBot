@@ -1,0 +1,1 @@
+. ~/venvs/AzuraBot/bin/activate
