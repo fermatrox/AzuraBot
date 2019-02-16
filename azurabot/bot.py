@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-import os
-import re
+import configparser
 import importlib
+import os
 
 """
 AzuraBot's most important file.
@@ -15,26 +15,41 @@ class Bot:
     """
 
     def __init__(self):
-        pass
+        self.config = configparser.ConfigParser()
+        self.config.read("etc/azurabot.conf")
 
     def run(self):
         self._load_all_plugins()
         self._main_loop()
 
     def _load_all_plugins(self):
-        reg = re.compile(".+_pi\.py$", re.IGNORECASE)
-        file_names = filter(reg.search,
-                            os.listdir(os.path.join("azurabot",
-                                                    "plugins")))
+        """
+        Load all plugins.
+        """
+        plugins_dir = self.config["plugins"]["dir"]
+        plugins_str = self.config["plugins"]["plugins"].replace("\r", "")
+        file_names = [file_name for file_name in plugins_str.split("\n")
+                      if len(file_name)]
         for file_name in file_names:
-            self._load_plugin(file_name[:-3])
+            self._load_plugin(f"{plugins_dir}.{file_name}")
 
     def _load_plugin(self, file_name):
+        """
+        Load a single plugin. Return True on success.
+        """
+        if file_name.endswith(".py"):
+            file_name = file_name[:-3]
+
         print("Loading plugin", file_name)
 
-        file = importlib.import_module("azurabot.plugins." + file_name)
+        try:
+            file = importlib.import_module(file_name)
+        except ModuleNotFoundError:
+            print("Plugin not found:", file_name.replace(".", "/") + ".py")
+            return False
         plugin = file.Plugin()
         plugin.start()
+        return True
 
     def _main_loop(self):
         pass
@@ -60,6 +75,10 @@ class Bot:
 
     def _handle_out_msg(self, msg):
         pass
+
+
+class AzuraBotError(Exception):
+    pass
 
 
 if __name__ == "__main__":
