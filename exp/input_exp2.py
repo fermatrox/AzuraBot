@@ -8,6 +8,7 @@ import asyncio
 import functools
 import sys
 
+
 class Prompt(object):
 
     def __init__(self, loop=None):
@@ -31,7 +32,7 @@ async def main():
 
     while True:
         print(await raw_input("enter something:"))
-            
+
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(main())
