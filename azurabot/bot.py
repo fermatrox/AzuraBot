@@ -4,6 +4,9 @@ import configparser
 import importlib
 import os
 
+import azurabot.user
+import azurabot.msg
+
 """
 AzuraBot's most important file.
 """
@@ -19,6 +22,10 @@ class Bot:
         self.config.read("etc/azurabot.conf")
 
     def run(self):
+        user = azurabot.user.User("Enfors")
+        msg = azurabot.msg.Msg(azurabot.msg.FROM_USER, user, "foo")
+        print(user)
+        print(msg)
         self._load_all_plugins()
         self._main_loop()
 
