@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
+import asyncio
 import configparser
 import importlib
-import os
 
 import azurabot.user
 import azurabot.msg
@@ -21,15 +21,18 @@ class Bot:
         self.config = configparser.ConfigParser()
         self.config.read("etc/azurabot.conf")
 
-    def run(self):
-        user = azurabot.user.User("Enfors")
-        msg = azurabot.msg.Msg(azurabot.msg.FROM_USER, user, "foo")
-        print(user)
-        print(msg)
-        self._load_all_plugins()
-        self._main_loop()
+        self.plugins = []
 
-    def _load_all_plugins(self):
+    async def run(self):
+        # user = azurabot.user.User("Enfors")
+        # msg = azurabot.msg.Msg(azurabot.msg.FROM_USER, user, "foo")
+        # print(user)
+        # print(msg)
+        self.bot_inbox = asyncio.Queue()
+        await self._load_all_plugins()
+        await self._main_loop()
+
+    async def _load_all_plugins(self):
         """
         Load all plugins.
         """
@@ -38,7 +41,8 @@ class Bot:
         file_names = [file_name for file_name in plugins_str.split("\n")
                       if len(file_name)]
         for file_name in file_names:
-            self._load_plugin(f"{plugins_dir}.{file_name}")
+            full_path = "%s.%s" % (plugins_dir, file_name)
+            self.plugins.append(self._load_plugin(full_path))
 
     def _load_plugin(self, file_name):
         """
@@ -54,12 +58,27 @@ class Bot:
         except ModuleNotFoundError:
             print("Plugin not found:", file_name.replace(".", "/") + ".py")
             return False
-        plugin = file.Plugin()
-        plugin.start()
-        return True
+        plugin = file.Plugin(self.bot_inbox)
+        return plugin
 
-    def _main_loop(self):
-        pass
+    async def _main_loop(self):
+        keep_running = True
+        await self._start_all_plugins()
+
+        while keep_running:
+            payload = await self.bot_inbox.get()
+            print("Received payload: '%s'" % payload)
+            if payload == "Hello, bot!":
+                keep_running = False
+
+    async def _start_all_plugins(self):
+
+        start_tasks = []
+
+        for plugin in self.plugins:
+            start_tasks.append(asyncio.create_task(plugin.start()))
+
+        await asyncio.gather(*start_tasks)
 
     def _handle_inc_msg(self, msg):
         msg = self._filter_inc_msg(msg)
@@ -90,4 +109,4 @@ class AzuraBotError(Exception):
 
 if __name__ == "__main__":
     bot = Bot()
-    bot.run()
+    asyncio.run(bot.run())

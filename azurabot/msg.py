@@ -4,7 +4,7 @@ The msg class file.
 
 from azurabot.user import User
 
-# msg_type
+# direction
 FROM_USER = 1
 TO_USER = 2
 
@@ -15,17 +15,17 @@ class Msg:
     """
 
     def __init__(self,
-                 msg_type: int,
+                 direction: int,
                  user: User,
                  payload: str=None):
-        self.msg_type = msg_type
+        self.direction = direction
         self.user = user
         self.payload = payload
 
     def __str__(self):
-        if self.msg_type == FROM_USER:
+        if self.direction == FROM_USER:
             preposition = "from"
-        elif self.msg_type == TO_USER:
+        elif self.direction == TO_USER:
             preposition = "to"
 
         if self.payload:
