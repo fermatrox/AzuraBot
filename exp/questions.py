@@ -1,16 +1,12 @@
 import random
-import pdb
-
-
-pdb.set_trace()
 
 
 def ask_questions(qs_and_as):
 
     num_qs_and_as = len(qs_and_as)
-    cur = 0
 
     while True:
+        cur = 0
         while cur <= num_qs_and_as:
             if cur == num_qs_and_as - 1 or random.randint(0, 2) == 0:
                 i = 0
@@ -30,26 +26,31 @@ def ask_questions(qs_and_as):
                     qs_and_as.insert(0, q_and_a)
 
                 cur = 0
-            cur = cur + 1
+            else:
+                cur = cur + 1
 
 
 def ask_question(q_and_a):
     q = q_and_a[0]
     a = q_and_a[1]
 
-    user_answer = int(input(q + "? "))
+    try:
+        user_answer = int(input(q + "? "))
+    except ValueError:
+        user_answer = 0
     if user_answer == a:
         input("Correct.")
         return True
     else:
-        input("False.")
+        input("False. Correct answer is %d." % a)
         return False
 
 
 if __name__ == "__main__":
     qs_and_as = []
-    max_a = max_b = 10
-    a = 2
+    min_a = 11
+    max_a = max_b = 15
+    a = min_a
 
     while a <= max_a:
         b = a
