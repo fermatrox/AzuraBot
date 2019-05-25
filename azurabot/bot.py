@@ -66,7 +66,8 @@ class Bot:
         await self._start_all_plugins()
 
         while keep_running:
-            payload = await self.bot_inbox.get()
+            msg = await self.bot_inbox.get()
+            payload = msg.payload
             print("Received payload: '%s'" % payload)
             if payload == "Hello, bot!":
                 keep_running = False

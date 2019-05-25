@@ -2,6 +2,8 @@
 The msg class file.
 """
 
+import asyncio
+
 from azurabot.user import User
 
 # direction
@@ -12,11 +14,20 @@ TO_USER = 2
 class Msg:
     """
     Represents a message between a user and the bot.
+
+    direction: FROM_USER or TO_USER
+    user: the User object representing the user.
+    reply_to: the asyncio.Queue to send any reply to.
+    payload: the contents of the message.
+
+    Messages are sent either from a user, through an Interface to
+    the bot, or the other way around (as indicated by "direction").
     """
 
     def __init__(self,
                  direction: int,
                  user: User,
+                 reply_to: asyncio.Queue,
                  payload: str=None):
         self.direction = direction
         self.user = user
