@@ -19,18 +19,15 @@ class Plugin(AsyncInterface):
         await asyncio.sleep(1)
 
         user = azurabot.user.User(identifiers={"testinterface": "Tester"})
-        msg = azurabot.msg.Msg(direction=azurabot.msg.FROM_USER,
-                               user=user,
-                               reply_to=self.inbox,
-                               payload="Hello, bot!")
 
         print("[plugin] Sending...")
-        await self.bot_inbox.put(msg)
-        print("[plugin] Sent. Awaiting answer...")
+        await self.send_user_text_to_bot(user, "Hello, bot!")
         answer = await self.inbox.get()
-        print(f"[plugin] Received answer: {answer.payload}.")
+        print(f"[plugin] Received answer: '{answer.payload}'")
+
+        await asyncio.sleep(1)
 
         print("[plugin] Sending...")
         await self.send_user_text_to_bot(user, "Nice to meet you!")
         answer = await self.inbox.get()
-        print(f"[plugin] Received another answer: {answer.payload}.")
+        print(f"[plugin] Received another answer: '{answer.payload}'")
