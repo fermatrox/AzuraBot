@@ -7,6 +7,8 @@ decendants interface.async or interface.threaded.
 
 import asyncio
 
+import azurabot
+
 
 class Interface:
     """
@@ -24,6 +26,22 @@ class Interface:
 
     async def get_msg(self):
         return await self.inbox.get()
+
+    async def send_msg_to_bot(self, msg: azurabot.msg.Msg):
+        """
+        Send any kind of message to the bot.
+        """
+        await self.bot_inbox.put(msg)
+
+    async def send_user_text_to_bot(self, user: azurabot.user.User, text: str):
+        """
+        Send a text message from the user to the bot.
+        """
+        msg = azurabot.msg.Msg(direction=azurabot.msg.FROM_USER,
+                               user=user,
+                               reply_to=self.inbox,
+                               payload=text)
+        await self.send_msg_to_bot(msg)
 
     def start(self):
         pass

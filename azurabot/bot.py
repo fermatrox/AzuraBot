@@ -51,7 +51,7 @@ class Bot:
         if file_name.endswith(".py"):
             file_name = file_name[:-3]
 
-        print("Loading plugin", file_name)
+        print("[bot] Loading plugin", file_name)
 
         try:
             file = importlib.import_module(file_name)
@@ -64,12 +64,17 @@ class Bot:
     async def _main_loop(self):
         keep_running = True
         await self._start_all_plugins()
-
         while keep_running:
             msg = await self.bot_inbox.get()
             payload = msg.payload
-            print("Received payload: '%s'" % payload)
+            print("[bot] Received payload: '%s'" % payload)
             if payload == "Hello, bot!":
+                print("[bot] Replying...")
+                await msg.reply("Hello yourself!", self.bot_inbox)
+            else:
+                print("[bot] Replying again...")
+                await msg.reply("Your message has been received.",
+                                self.bot_inbox)
                 keep_running = False
 
     async def _start_all_plugins(self):

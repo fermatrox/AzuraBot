@@ -31,7 +31,20 @@ class Msg:
                  payload: str=None):
         self.direction = direction
         self.user = user
+        self.reply_to = reply_to
         self.payload = payload
+
+    async def reply(self, payload: str, replyer_inbox: asyncio.Queue):
+        if self.direction == FROM_USER:
+            direction = TO_USER
+        else:
+            direction = FROM_USER
+
+        reply_msg = Msg(direction=direction,
+                        user=self.user,
+                        reply_to=replyer_inbox,
+                        payload=payload)
+        await self.reply_to.put(reply_msg)
 
     def __str__(self):
         if self.direction == FROM_USER:
