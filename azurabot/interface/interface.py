@@ -7,10 +7,10 @@ decendants interface.async or interface.threaded.
 
 import asyncio
 
-import azurabot
+import azurabot.plugins.plugin
 
 
-class Interface:
+class Interface(azurabot.plugins.plugin.Plugin):
     """
     Represents an interface between the bot and an external service,
     such as Slack or IRC. Basically, an interface talks to something
@@ -18,6 +18,7 @@ class Interface:
     """
 
     def __init__(self, bot_inbox):
+        self.name = "(unnamed interface plugin)"
         self.bot_inbox = bot_inbox
         self.inbox = asyncio.Queue()
 
