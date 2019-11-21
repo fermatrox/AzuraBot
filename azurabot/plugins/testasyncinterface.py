@@ -11,7 +11,7 @@ from azurabot.interface.asyncinterface import AsyncInterface
 
 class Plugin(AsyncInterface):
 
-    async def start(self):
+    async def run(self):
         self.name = "testasyncinterface"
         self.log("Async plugin started.")
         send_task = asyncio.create_task(self.send_msg("Hello, bot!"))
