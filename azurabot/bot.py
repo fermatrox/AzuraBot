@@ -42,7 +42,10 @@ class Bot:
                       if len(file_name)]
         for file_name in file_names:
             full_path = "%s.%s" % (plugins_dir, file_name)
-            self.plugins.append(self._load_plugin(full_path))
+            plugin = self._load_plugin(full_path)
+
+            if plugin:
+                self.plugins.append(plugin)
 
     def _load_plugin(self, file_name):
         """
@@ -82,7 +85,7 @@ class Bot:
         start_tasks = []
 
         for plugin in self.plugins:
-            start_tasks.append(asyncio.create_task(plugin.start()))
+            start_tasks.append(asyncio.create_task(plugin.start(self.config)))
 
         await asyncio.gather(*start_tasks)
 
