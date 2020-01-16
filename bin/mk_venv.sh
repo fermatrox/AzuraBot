@@ -1,12 +1,12 @@
 #!/bin/bash
 
-virtual_envs_path="$HOME/venvs"
+virtual_env_path="$HOME/venvs"
 
-if [ ! -d $virtual_env_paths ]; then
-    mkdir -p $virtual_envs_path
+if [ ! -d $virtual_env_path ]; then
+    mkdir -p $virtual_env_path
 fi
 
-cd $virtual_envs_path
+cd $virtual_env_path
 
 virtualenv -p /usr/bin/python3.7 AzuraBot
 
