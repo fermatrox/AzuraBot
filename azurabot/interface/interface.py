@@ -32,13 +32,14 @@ class Interface(azurabot.plugins.plugin.Plugin):
         """
         Send any kind of message to the bot.
         """
+        msg.direction = azurabot.msg.TO_BOT
         await self.bot_inbox.put(msg)
 
     async def send_user_text_to_bot(self, user: azurabot.user.User, text: str):
         """
         Send a text message from the user to the bot.
         """
-        msg = azurabot.msg.Msg(direction=azurabot.msg.FROM_USER,
+        msg = azurabot.msg.Msg(direction=azurabot.msg.TO_BOT,
                                user=user,
                                reply_to=self.inbox,
                                payload=text)

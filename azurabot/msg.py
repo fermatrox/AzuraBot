@@ -7,15 +7,15 @@ import asyncio
 from azurabot.user import User
 
 # direction
-FROM_USER = 1
-TO_USER = 2
+TO_BOT = 1
+FROM_BOT = 2
 
 
 class Msg:
     """
     Represents a message between a user and the bot.
 
-    direction: FROM_USER or TO_USER
+    direction: TO_BOT or FROM_BOT
     user: the User object representing the user.
     reply_to: the asyncio.Queue to send any reply to.
     payload: the contents of the message.
@@ -35,10 +35,10 @@ class Msg:
         self.payload = payload
 
     async def reply(self, payload: str, replyer_inbox: asyncio.Queue):
-        if self.direction == FROM_USER:
-            direction = TO_USER
+        if self.direction == TO_BOT:
+            direction = FROM_BOT
         else:
-            direction = FROM_USER
+            direction = TO_BOT
 
         reply_msg = Msg(direction=direction,
                         user=self.user,
@@ -47,9 +47,9 @@ class Msg:
         await self.reply_to.put(reply_msg)
 
     def __str__(self):
-        if self.direction == FROM_USER:
+        if self.direction == TO_BOT:
             preposition = "from"
-        elif self.direction == TO_USER:
+        elif self.direction == FROM_BOT:
             preposition = "to"
 
         if self.payload:
