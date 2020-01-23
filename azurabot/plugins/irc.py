@@ -47,23 +47,28 @@ class Plugin(AsyncInterface):
 
         """
         while True:
-            msg = await self.irc_bot.get_msg(5)
+            irc_msg = await self.irc_bot.get_msg(5)
 
-            if not msg:
+            if not irc_msg:
                 continue
 
-            if msg.msg_type == "PRIVMSG" and msg.channel == self.nickname:
-                self.log(f"Private message: {msg.sender}->{msg.channel}: "
-                         f"{msg.msg_text}")
-                await self.irc_bot.privmsg(msg.sender, "Hello there.")
+            user = azurabot.user.User(identifiers={"irc": irc_msg.sender})
 
-            if msg.msg_type == "PRIVMSG" and msg.channel != self.nickname:
-                self.log(f"Channel message: {msg.sender} @ {msg.channel}: "
-                         f"{msg.msg_text}")
+            if irc_msg.msg_type == "PRIVMSG" and irc_msg.channel == self.nickname:
+                self.log(f"Private message: {irc_msg.sender}->{irc_msg.channel}: "
+                         f"{irc_msg.msg_text}")
+                await self.send_user_text_to_bot(user, irc_msg.msg_text)
 
+            if irc_msg.msg_type == "PRIVMSG" and irc_msg.channel != self.nickname:
+                self.log(f"Channel message: {irc_msg.sender} @ {irc_msg.channel}: "
+                         f"{irc_msg.msg_text}")
 
     async def _send_loop(self):
         """This is the loop that sends messages from AzuraBot, that is,
         it gets messages from AzuraBot to send to the IRC server.
         """
-        pass
+        msg = await self.inbox.get()
+        user = msg.user
+        await self.irc_bot.privmsg(user.identifiers["irc"], msg.text)
+
+        
