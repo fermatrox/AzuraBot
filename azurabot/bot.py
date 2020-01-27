@@ -29,7 +29,25 @@ class Bot:
         # print(user)
         # print(msg)
         self.bot_inbox = asyncio.Queue()
+
+        #
+        # Step 1: Load all plugins
+        #
         await self._load_all_plugins()
+
+        #
+        # Step 2: Start all plugins
+        #
+        await self._start_all_plugins()
+
+        #
+        # Step 3: Start all background tasks
+        #
+        await self._start_cron_task()
+
+        #
+        # Step 4: Enter main loop
+        #
         await self._main_loop()
 
     async def _load_all_plugins(self):
@@ -66,19 +84,26 @@ class Bot:
 
     async def _main_loop(self):
         keep_running = True
-        await self._start_all_plugins()
+
         while keep_running:
+            pass
             msg = await self.bot_inbox.get()
             text = msg.text
             print("[bot] Received text: '%s'" % text)
-            if text == "Hello, bot!":
-                print("[bot] Replying...")
-                await msg.reply("Hello yourself!", self.bot_inbox)
-            else:
-                print("[bot] Replying again...")
-                await msg.reply("Your message has been received.",
-                                self.bot_inbox)
-                keep_running = False
+
+            # The reason why we start a task here, is because in the future, the functio
+            # _handle_inc_msg() might be slow - perhaps it has to load users from a slow
+            # database, or something. 
+            asyncio.create_task(self._handle_inc_msg(msg))
+            
+            # if text == "Hello, bot!":
+            #     print("[bot] Replying...")
+            #     await msg.reply("Hello yourself!", self.bot_inbox)
+            # else:
+            #     print("[bot] Replying again...")
+            #     await msg.reply("Your message has been received.",
+            #                     self.bot_inbox)
+            #     keep_running = False
 
     async def _start_all_plugins(self):
 
@@ -89,26 +114,43 @@ class Bot:
 
         await asyncio.gather(*start_tasks)
 
-    def _handle_inc_msg(self, msg):
-        msg = self._filter_inc_msg(msg)
+    async def _start_cron_task(self):
+        """This function starts the background timer task. For example, if
+        users want a weather report at a certain time each day, it
+        will be handled by the background timer.
 
-        intent = self._select_intent(msg)
+        """
+        pass
+        
+    async def _handle_inc_msg(self, msg: azurabot.msg.Msg):
 
-        out_msgs = self._run_backend(intent)
+        user = await self._identify_msg_user(msg)
+        
+        msg = await self._filter_inc_msg(msg)
+
+        intent = await self._select_intent(msg)
+
+        out_msgs = await self._run_backend(intent)
 
         for out_msg in out_msgs:
-            self._handle_out_msg(out_msg)
+            await self._handle_out_msg(out_msg)
 
-    def _filter_inc_msg(self, msg):
+    async def _identify_msg_user(self, msg: azurabot.msg.Msg):
+        user = msg.user
+        await user.identify()
+        print(f"[bot] User identified: {user}")
+        return user
+            
+    async def _filter_inc_msg(self, msg: azurabot.msg.Msg):
         return msg
 
-    def _select_intent(msg):
-        pass
+    async def _select_intent(self, msg: azurabot.msg.Msg):
+        return None
 
-    def _run_backend(self, intent):
-        pass
+    async def _run_backend(self, intent):
+        return []
 
-    def _handle_out_msg(self, msg):
+    async def _handle_out_msg(self, msg: azurabot.msg.Msg):
         pass
 
 
