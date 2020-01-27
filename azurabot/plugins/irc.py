@@ -35,7 +35,8 @@ class Plugin(AsyncInterface):
 
         self.irc_bot = botymcbotface.async_irc.IRCBot(self.nickname,
                                                       self.password,
-                                                      debug_level=debug_level)
+                                                      debug_level=debug_level,
+                                                      version="0.0.1")
 
         await self.irc_bot.connect(self.server, self.main_channel)
         
