@@ -48,7 +48,15 @@ class User:
         self.identifiers = identifiers
         self.msgs = list()
 
-    def identify(self):
+        try:
+            service = list(identifiers.keys())[0]
+            ident = identifiers[service]
+            self.address = f"{service}#{ident}"
+        except:
+            self.address = f"(unknown)#(unknown)"
+            raise
+
+    async def identify(self):
         """
         Attempt to identify a user (read: find them in the bot's
         database) by matching an entry in the user's 'identifiers'
@@ -61,7 +69,10 @@ class User:
         Else:
         - Return False
         """
+        service = list(self.identifiers.keys())[0]
+        self.name = self.identifiers[service]
+        self.identified = True
         return False
 
     def __str__(self):
-        return "User: %s" % self.name
+        return f"User: {self.name} [{self.address}]"
