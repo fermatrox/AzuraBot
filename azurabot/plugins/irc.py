@@ -16,7 +16,7 @@ class Plugin(AsyncInterface):
 
     def __init__(self, config: configparser.ConfigParser):
         super().__init__(config)
-        self.name = "irc"
+        self.name = "IRC"
     
     async def run(self):
         """This starts the plugin.

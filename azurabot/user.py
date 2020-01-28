@@ -2,6 +2,8 @@
 The user class file.
 """
 
+import asyncio
+
 
 class User:
     """
@@ -46,12 +48,14 @@ class User:
         self.name = None
         self.identified = False
         self.identifiers = identifiers
-        self.msgs = list()
+        #self.msgs = list()
+        self.inbox = asyncio.Queue()
+        self.loop_task = None
 
         try:
             service = list(identifiers.keys())[0]
             ident = identifiers[service]
-            self.address = f"{service}#{ident}"
+            self.address = f"{ident}#{service}"
         except:
             self.address = f"(unknown)#(unknown)"
             raise

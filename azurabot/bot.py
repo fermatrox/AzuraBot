@@ -7,6 +7,9 @@ import importlib
 import azurabot.user
 import azurabot.msg
 
+from azurabot.intent import Intent
+from azurabot.user import User
+
 """
 AzuraBot's most important file.
 """
@@ -22,6 +25,10 @@ class Bot:
         self.config.read("etc/azurabot.conf")
 
         self.plugins = []
+
+        self.intents = {}
+
+        self.online_users = {}
 
     async def run(self):
         # user = azurabot.user.User("Enfors")
@@ -75,11 +82,11 @@ class Bot:
         print("[bot] Loading plugin", file_name)
 
         try:
-            file = importlib.import_module(file_name)
+            plugin_file = importlib.import_module(file_name)
         except ModuleNotFoundError:
             print("Plugin not found:", file_name.replace(".", "/") + ".py")
             return False
-        plugin = file.Plugin(self.bot_inbox)
+        plugin = plugin_file.Plugin(self.bot_inbox)
         return plugin
 
     async def _main_loop(self):
@@ -112,8 +119,30 @@ class Bot:
         for plugin in self.plugins:
             start_tasks.append(asyncio.create_task(plugin.start(self.config)))
 
+            try:
+                plugin_intents = plugin.intents
+
+                await self._add_intents(plugin_intents)
+            except AttributeError:
+                pass
+
         await asyncio.gather(*start_tasks)
 
+    async def _add_intents(self, intents: list):
+        for intent in intents:
+            await self._add_intent(intent)
+
+    async def _add_intent(self, intent: Intent):
+        if intent.name in self.intents:
+            existing_intent = self.intents[intent.name]
+            print(f"[bot] Intent conflict: {intent.name} exists in both "
+                  f"{intent.intent_file} and {existing_intent.intent_file}. "
+                  f"Using the one in {existing_intent.intent_file}.")
+            return False
+
+        print(f"[bot] Adding intent {intent.name}.")
+        self.intents[intent.name] = intent
+        
     async def _start_cron_task(self):
         """This function starts the background timer task. For example, if
         users want a weather report at a certain time each day, it
@@ -125,15 +154,37 @@ class Bot:
     async def _handle_inc_msg(self, msg: azurabot.msg.Msg):
 
         user = await self._identify_msg_user(msg)
+
+        if not user.address in self.online_users:
+            self.online_users[user.address] = user
+            user.loop_task = asyncio.create_task(self._user_loop(user))
+            asyncio.gather(user.loop_task) # todo: Maybe shouldn't be here
+
+        print(f"Putting message in user box {user.inbox!r}")
+        await user.inbox.put(msg)
+
+    async def _user_loop(self, user: azurabot.user.User):
+        keep_running = True
+        out_msgs = []
         
-        msg = await self._filter_inc_msg(msg)
+        print(f"[bot] User loop started for {user.address}")
+        
+        while keep_running:
+            print(f"[bot] Awaiting messages from user box {user.inbox!r}")
+            msg = await user.inbox.get()
+            print("[bot] Filtering")
+            msg = await self._filter_inc_msg(msg)
+            print("[bot] Selecting intent")
+            intent = await self._select_intent(msg)
+            print("[bot] Checking intent")
+            if intent:
+                out_msgs = await self._run_intent(user, intent, msg)
+                print("[bot] Intent completed.")
+            else:
+                await msg.reply("I'm sorry, but I don't understand.", self.bot_inbox)
 
-        intent = await self._select_intent(msg)
-
-        out_msgs = await self._run_backend(intent)
-
-        for out_msg in out_msgs:
-            await self._handle_out_msg(out_msg)
+            #for out_msg in out_msgs:
+            #    await self._handle_out_msg(out_msg)
 
     async def _identify_msg_user(self, msg: azurabot.msg.Msg):
         user = msg.user
@@ -145,10 +196,16 @@ class Bot:
         return msg
 
     async def _select_intent(self, msg: azurabot.msg.Msg):
-        return None
+        text = msg.text
+        intent_name = text.split(" ")[0]
+        print(f"[bot] Intent: {intent_name}")
+        try:
+            return self.intents[intent_name]
+        except KeyError:
+            return None
 
-    async def _run_backend(self, intent):
-        return []
+    async def _run_intent(self, user: User, intent: Intent, msg: azurabot.msg.Msg):
+        await intent.do(user, msg)
 
     async def _handle_out_msg(self, msg: azurabot.msg.Msg):
         pass
