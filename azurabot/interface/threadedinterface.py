@@ -15,5 +15,6 @@ class ThreadedInterface(interface.Interface):
         self.thread.start()
 
     def thread_start(self):
+        # This probably shouldn't be here.
         self.loop = asyncio.new_event_loop()
-        await self.run()
+        #await self.run()
