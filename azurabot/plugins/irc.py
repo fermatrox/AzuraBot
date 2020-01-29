@@ -69,8 +69,11 @@ class Plugin(AsyncInterface):
         """This is the loop that sends messages from AzuraBot, that is,
         it gets messages from AzuraBot to send to the IRC server.
         """
-        msg = await self.inbox.get()
-        user = msg.user
-        await self.irc_bot.privmsg(user.identifiers["irc"], msg.text)
+        keep_running = True
+
+        while keep_running:
+            msg = await self.inbox.get()
+            user = msg.user
+            await self.irc_bot.privmsg(user.identifiers["irc"], msg.text)
 
         

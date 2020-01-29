@@ -161,9 +161,11 @@ class Bot:
         if not user.address in self.online_users:
             self.online_users[user.address] = user
             user.loop_task = asyncio.create_task(self._user_loop(user))
-            asyncio.gather(user.loop_task) # todo: Maybe shouldn't be here
+            # asyncio.gather(user.loop_task) # todo: Maybe shouldn't be here
+        else:
+            user = self.online_users[user.address]
 
-        print(f"Putting message in user box {user.inbox!r}")
+        #print(f"Putting message in user box {user.inbox!r}")
         await user.inbox.put(msg)
 
     async def _user_loop(self, user: azurabot.user.User):
@@ -173,21 +175,19 @@ class Bot:
         print(f"[bot] User loop started for {user.address}")
         
         while keep_running:
-            print(f"[bot] Awaiting messages from user box {user.inbox!r}")
+            #print(f"[bot] Awaiting messages from user box {user.inbox!r}")
             msg = await user.inbox.get()
-            print("[bot] Filtering")
+            #print("[bot] Filtering")
             msg = await self._filter_inc_msg(msg)
-            print("[bot] Selecting intent")
+            #print("[bot] Selecting intent")
             intent = await self._select_intent(msg)
-            print("[bot] Checking intent")
+            #print("[bot] Checking intent")
             if intent:
-                out_msgs = await self._run_intent(user, intent, msg)
+                await self._run_intent(user, intent, msg)
                 print("[bot] Intent completed.")
             else:
+                print("[bot] Intent failed.")
                 await msg.reply("I'm sorry, but I don't understand.", self.bot_inbox)
-
-            #for out_msg in out_msgs:
-            #    await self._handle_out_msg(out_msg)
 
     async def _identify_msg_user(self, msg: azurabot.msg.Msg):
         user = msg.user
@@ -209,9 +209,6 @@ class Bot:
 
     async def _run_intent(self, user: User, intent: Intent, msg: azurabot.msg.Msg):
         await intent.do(user, msg)
-
-    async def _handle_out_msg(self, msg: azurabot.msg.Msg):
-        pass
 
 
 class AzuraBotError(Exception):
