@@ -2,6 +2,7 @@
 
 import asyncio
 import configparser
+import os
 import importlib
 
 import azurabot.user
@@ -22,6 +23,8 @@ class Bot:
 
     def __init__(self):
         self.config = configparser.ConfigParser()
+        if not os.path.isfile("etc/azurabot.conf"):
+            raise AzuraBotError("Config file etc/azurabot.conf not found")
         self.config.read("etc/azurabot.conf")
 
         self.plugins = []
