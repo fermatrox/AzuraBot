@@ -14,9 +14,9 @@ from azurabot.interface.asyncinterface import AsyncInterface
 
 class Plugin(AsyncInterface):
 
-    def __init__(self, config: configparser.ConfigParser):
-        super().__init__(config)
-        self.name = "IRC"
+    #def __init__(self, config: configparser.ConfigParser, bot_inbox: asyncio.Queue):
+    #    super().__init__(config, bot_inbox)
+    #    self.name = "IRC"
     
     async def run(self):
         """This starts the plugin.

@@ -6,6 +6,7 @@ decendants interface.async or interface.threaded.
 """
 
 import asyncio
+import configparser
 
 import azurabot
 from azurabot.msg import Msg
@@ -19,9 +20,12 @@ class Interface(azurabot.plugins.plugin.Plugin):
     in the external world, to which users connect.
     """
 
-    def __init__(self, bot_inbox):
-        self.name = "(unnamed interface plugin)"
+    def __init__(self, config: configparser.ConfigParser, bot_inbox: asyncio.Queue,
+                 name: str="(unnamed interface plugin)"):
+        self.config = config
         self.bot_inbox = bot_inbox
+
+        self.name = name
         self.inbox = asyncio.Queue()
 
     async def put_msg(self, msg):
@@ -46,6 +50,3 @@ class Interface(azurabot.plugins.plugin.Plugin):
                   reply_to=self.inbox,
                   text=text)
         await self.send_msg_to_bot(msg)
-
-    def start(self):
-        pass

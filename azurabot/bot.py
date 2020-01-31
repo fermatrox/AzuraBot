@@ -9,6 +9,7 @@ import azurabot.user
 import azurabot.msg
 
 from azurabot.intent import Intent
+from azurabot.msg import Msg
 from azurabot.user import User
 
 """
@@ -60,6 +61,22 @@ class Bot:
         #
         await self._main_loop()
 
+    async def reply(self, old_msg: Msg, text: str):
+        """Given a previous message old_msg, this function replies to it with
+        the text in the text argument.
+
+        """
+        if old_msg.direction == azurabot.msg.TO_BOT:
+            direction = azurabot.msg.FROM_BOT
+        else:
+            direction = azurabot.msg.TO_BOT
+
+        reply_msg = Msg(direction=direction,
+                        user=old_msg.user,
+                        reply_to=new_msg.reply_to,
+                        text=text)
+        await old_msg.put(reply_msg)
+            
     async def _load_all_plugins(self):
         """
         Load all plugins.
@@ -82,14 +99,18 @@ class Bot:
         if file_name.endswith(".py"):
             file_name = file_name[:-3]
 
-        print("[bot] Loading plugin", file_name)
+        base_name = file_name.split(".")[-1]
+
+        print("[bot] Loading plugin", base_name)
 
         try:
             plugin_file = importlib.import_module(file_name)
         except ModuleNotFoundError:
             print("Plugin not found:", file_name.replace(".", "/") + ".py")
             return False
-        plugin = plugin_file.Plugin(self.bot_inbox)
+        plugin = plugin_file.Plugin(config=self.config,
+                                    bot_inbox=self.bot_inbox,
+                                    name=base_name)
         return plugin
 
     async def _main_loop(self):
@@ -120,7 +141,8 @@ class Bot:
         start_tasks = []
 
         for plugin in self.plugins:
-            start_tasks.append(asyncio.create_task(plugin.start(self.config)))
+            print(f"[bot] Starting plugin {plugin.name}...")
+            start_tasks.append(asyncio.create_task(plugin.start()))
 
             try:
                 plugin_intents = plugin.intents
@@ -201,10 +223,12 @@ class Bot:
     async def _select_intent(self, msg: azurabot.msg.Msg):
         text = msg.text
         intent_name = text.split(" ")[0]
-        print(f"[bot] Intent: {intent_name}")
         try:
-            return self.intents[intent_name]
+            intent = self.intents[intent_name](self)
+            print(f"[bot] Intent: \"{intent_name}\"")
+            return intent
         except KeyError:
+            print(f"[bot] No intent found for \"{intent_name}\"")
             return None
 
     async def _run_intent(self, user: User, intent: Intent, msg: azurabot.msg.Msg):
