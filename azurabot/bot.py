@@ -101,11 +101,13 @@ class Bot:
             text = msg.text
             print("[bot] Received text: '%s'" % text)
 
-            # The reason why we start a task here, is because in the future, the functio
-            # _handle_inc_msg() might be slow - perhaps it has to load users from a slow
-            # database, or something. 
+            # The reason why we start a task here, is because in the
+            # future, the functio _handle_inc_msg() might be slow -
+            # perhaps it has to load users from a slow database, or
+            # something.
+
             asyncio.create_task(self._handle_inc_msg(msg))
-            
+
             # if text == "Hello, bot!":
             #     print("[bot] Replying...")
             #     await msg.reply("Hello yourself!", self.bot_inbox)
@@ -145,7 +147,7 @@ class Bot:
 
         print(f"[bot] Adding intent {intent.name}.")
         self.intents[intent.name] = intent
-        
+
     async def _start_cron_task(self):
         """This function starts the background timer task. For example, if
         users want a weather report at a certain time each day, it
@@ -153,48 +155,49 @@ class Bot:
 
         """
         pass
-        
+
     async def _handle_inc_msg(self, msg: azurabot.msg.Msg):
 
         user = await self._identify_msg_user(msg)
 
-        if not user.address in self.online_users:
+        if user.address not in self.online_users:
             self.online_users[user.address] = user
             user.loop_task = asyncio.create_task(self._user_loop(user))
             # asyncio.gather(user.loop_task) # todo: Maybe shouldn't be here
         else:
             user = self.online_users[user.address]
 
-        #print(f"Putting message in user box {user.inbox!r}")
+        # print(f"Putting message in user box {user.inbox!r}")
         await user.inbox.put(msg)
 
     async def _user_loop(self, user: azurabot.user.User):
         keep_running = True
-        out_msgs = []
-        
+        # out_msgs = []
+
         print(f"[bot] User loop started for {user.address}")
-        
+
         while keep_running:
-            #print(f"[bot] Awaiting messages from user box {user.inbox!r}")
+            # print(f"[bot] Awaiting messages from user box {user.inbox!r}")
             msg = await user.inbox.get()
-            #print("[bot] Filtering")
+            # print("[bot] Filtering")
             msg = await self._filter_inc_msg(msg)
-            #print("[bot] Selecting intent")
+            # print("[bot] Selecting intent")
             intent = await self._select_intent(msg)
-            #print("[bot] Checking intent")
+            # print("[bot] Checking intent")
             if intent:
                 await self._run_intent(user, intent, msg)
                 print("[bot] Intent completed.")
             else:
                 print("[bot] Intent failed.")
-                await msg.reply("I'm sorry, but I don't understand.", self.bot_inbox)
+                await msg.reply("I'm sorry, but I don't understand.",
+                                self.bot_inbox)
 
     async def _identify_msg_user(self, msg: azurabot.msg.Msg):
         user = msg.user
         await user.identify()
         print(f"[bot] User identified: {user}")
         return user
-            
+
     async def _filter_inc_msg(self, msg: azurabot.msg.Msg):
         return msg
 
@@ -207,7 +210,8 @@ class Bot:
         except KeyError:
             return None
 
-    async def _run_intent(self, user: User, intent: Intent, msg: azurabot.msg.Msg):
+    async def _run_intent(self, user: User, intent: Intent,
+                          msg: azurabot.msg.Msg):
         await intent.do(user, msg)
 
 
