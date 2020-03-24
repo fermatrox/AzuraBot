@@ -18,11 +18,43 @@ class HelloIntent(Intent):
     async def do(self, user: azurabot.user.User, msg: Msg):
         await msg.reply(f"Hello {user.name}!", user.inbox)
 
+
+class VersionIntent(Intent):
+    name = "Version"
+
+    def __init__(self, bot: azurabot.bot.Bot):
+        super().__init__(bot)
+        self.intent_file = __file__
+
+    async def do(self, user: azurabot.user.User, msg: Msg):
+        await msg.reply("Version command not implemented yet.", user.inbox)
+
+
+class StatusIntent(Intent):
+    name = "Status"
+
+    def __init__(self, bot: azurabot.bot.Bot):
+        super().__init__(bot)
+        self.intent_file = __file__
+
+    async def do(self, user: azurabot.user.User, msg: Msg):
+        await msg.reply("Ready.", user.inbox)
+        
+
+class NameIntent(Intent):
+    name = "Name"
+
+    def __init__(self, bot: azurabot.bot.Bot):
+        super().__init__(bot)
+        self.intent_file = __file__
+
+    async def do(self, user: azurabot.user.User, msg: Msg):
+        pass
         
 class Plugin(azurabot.plugins.plugin.Plugin):
     name = "std_intents"
     # By setting "intents", we signal to the bot that there are intents to use here.    
-    intents = [ HelloIntent ]
+    intents = [ HelloIntent, VersionIntent, StatusIntent ]
 
     async def run(self):
         pass
