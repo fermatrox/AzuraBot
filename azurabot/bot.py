@@ -182,12 +182,12 @@ class Bot:
 
         user = await self._identify_msg_user(msg)
 
-        if user.address not in self.online_users:
-            self.online_users[user.address] = user
+        if user.current_address not in self.online_users:
+            self.online_users[user.current_address] = user
             user.loop_task = asyncio.create_task(self._user_loop(user))
             # asyncio.gather(user.loop_task) # todo: Maybe shouldn't be here
         else:
-            user = self.online_users[user.address]
+            user = self.online_users[user.current_address]
 
         # print(f"Putting message in user box {user.inbox!r}")
         await user.inbox.put(msg)
@@ -196,7 +196,7 @@ class Bot:
         keep_running = True
         # out_msgs = []
 
-        print(f"[bot] User loop started for {user.address}")
+        print(f"[bot] User loop started for {user.current_address}")
 
         while keep_running:
             # print(f"[bot] Awaiting messages from user box {user.inbox!r}")
