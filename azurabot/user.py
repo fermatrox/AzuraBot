@@ -55,9 +55,9 @@ class User:
         try:
             service = list(identifiers.keys())[0]
             ident = identifiers[service]
-            self.address = f"{ident}#{service}"
+            self.current_address = f"{ident}#{service}"
         except:
-            self.address = f"(unknown)#(unknown)"
+            self.current_address = f"(unknown)#(unknown)"
             raise
 
     async def identify(self):
@@ -79,4 +79,4 @@ class User:
         return False
 
     def __str__(self):
-        return f"User: {self.name} [{self.address}]"
+        return f"User: {self.name} [{self.current_address}]"

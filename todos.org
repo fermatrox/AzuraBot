@@ -1,0 +1,13 @@
+* TODO Communication basics
+
+** TODO current_address
+
+** TODO User.tell()
+
+** TODO User.ask()
+
+* TODO Regex intent selection support
+
+* TODO Conversion plugin
+
+** [0-9]+ inches

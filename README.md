@@ -25,10 +25,10 @@ is this name that your instance of AzuraBot will have on IRC.
 # Configuration
 
 In AzuraBot's `etc` directory, there's an example configuration file
-called `example-azurabot.conf`. Rename it to `azurabot.conf`:
+called `example-azurabot.conf`. Copy it to `azurabot.conf`:
 
     $ cd etc
-    $ mv example-azurabot.conf azurabot.conf
+    $ cp example-azurabot.conf azurabot.conf
     
 Then, you have to edit `azurabot.conf` and insert your bot's nickname
 and password, which you presumably registered using the guide above,
