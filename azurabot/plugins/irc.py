@@ -3,7 +3,6 @@ An IRC interface plugin for AzuraBot.
 """
 
 import asyncio
-import configparser
 
 import botymcbotface.async_irc
 
@@ -14,10 +13,6 @@ from azurabot.interface.asyncinterface import AsyncInterface
 
 class Plugin(AsyncInterface):
 
-    #def __init__(self, config: configparser.ConfigParser, bot_inbox: asyncio.Queue):
-    #    super().__init__(config, bot_inbox)
-    #    self.name = "IRC"
-    
     async def run(self):
         """This starts the plugin.
         """
@@ -27,10 +22,11 @@ class Plugin(AsyncInterface):
         asyncio.create_task(self._send_loop())
 
     async def _init_irc(self):
-        self.server       = self.config["irc"]["server"]
-        self.nickname     = self.config["irc"]["nickname"]
-        self.password     = self.config["irc"]["password"]
-        debug_level       = self.config.getint("irc", "debug_level", fallback=0)
+        self.server = self.config["irc"]["server"]
+        self.nickname = self.config["irc"]["nickname"]
+        self.password = self.config["irc"]["password"]
+        debug_level = self.config.getint("irc", "debug_level",
+                                         fallback=0)
         self.main_channel = "#AzuraBot"
 
         self.irc_bot = botymcbotface.async_irc.IRCBot(self.nickname,
@@ -39,7 +35,7 @@ class Plugin(AsyncInterface):
                                                       version="0.0.1")
 
         await self.irc_bot.connect(self.server, self.main_channel)
-        
+
     async def _receive_loop(self):
         """This is the loop that receives messages for AzuraBot, that is,
         messages sent TO AzuraBot from the IRC server. It should NOT
@@ -56,13 +52,16 @@ class Plugin(AsyncInterface):
 
             user = azurabot.user.User(identifiers={"irc": irc_msg.sender})
 
-            if irc_msg.msg_type == "PRIVMSG" and irc_msg.channel == self.nickname:
-                self.log(f"Private message: {irc_msg.sender}->{irc_msg.channel}: "
-                         f"{irc_msg.msg_text}")
+            if irc_msg.msg_type == "PRIVMSG" and \
+               irc_msg.channel == self.nickname:
+                self.log(f"Private message: {irc_msg.sender}->"
+                         f"{irc_msg.channel}: {irc_msg.msg_text}")
                 await self.send_user_text_to_bot(user, irc_msg.msg_text)
 
-            if irc_msg.msg_type == "PRIVMSG" and irc_msg.channel != self.nickname:
-                self.log(f"Channel message: {irc_msg.sender} @ {irc_msg.channel}: "
+            if irc_msg.msg_type == "PRIVMSG" and \
+               irc_msg.channel != self.nickname:
+                self.log(f"Channel message: "
+                         f"{irc_msg.sender} @ {irc_msg.channel}: "
                          f"{irc_msg.msg_text}")
 
     async def _send_loop(self):
@@ -75,5 +74,3 @@ class Plugin(AsyncInterface):
             msg = await self.inbox.get()
             user = msg.user
             await self.irc_bot.privmsg(user.identifiers["irc"], msg.text)
-
-        
