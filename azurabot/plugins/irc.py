@@ -27,7 +27,8 @@ class Plugin(AsyncInterface):
         self.password = self.config["irc"]["password"]
         debug_level = self.config.getint("irc", "debug_level",
                                          fallback=0)
-        self.main_channel = "#AzuraBot"
+        self.main_channel = "#" + self.config.get("irc", "main_channel",
+                                                  fallback="AzuraBot")
 
         self.irc_bot = botymcbotface.async_irc.IRCBot(self.nickname,
                                                       self.password,
